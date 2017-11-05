@@ -2,6 +2,8 @@ import numpy as np
 import random as rand
 import pprint as pp
 
+from operator import attrgetter
+
 
 class Learner(object):
     """docstring for Learner"""
@@ -32,19 +34,45 @@ class TBLO(object):
         self.initialize()
         pp.pprint(self.learners)
 
+        for i, learner in enumerate(self.learners):
+            learner.subjects, learner.fitness = self.teacher_phase(learner, i)
+
+        pp.pprint(self.learners)
+
         return [None, None]
 
     def initialize(self):
         self.learners = [self.create_learner() for i in range(self.npopulation)]
 
-    def teacher_phase(self):
-        pass
+    def teacher_phase(self, learner, learner_index):
+        teacher = self.get_teacher()
+        tf = rand.randint(1, 2)
+        c = np.zeros(len(teacher.subjects))
 
-    def learner_phase(self):
+        for i, subject in enumerate(learner.subjects):
+            s_mean = np.mean([s.subjects[i] for s in self.learners])
+            r = rand.random()
+            diff_mean = teacher.subjects[i] - (tf * s_mean)
+            c[i] = subject + (r * diff_mean)
+
+        c_fitness = self.fitness(c)
+
+        if learner.fitness > c_fitness:
+            best = c
+            best_fitness = c_fitness
+        else:
+            best = learner.subjects
+            best_fitness = learner.fitness
+
+        return (best, best_fitness)
+
+    def learner_phase(self, learner, learner_index):
         pass
 
     def get_teacher(self):
-        pass
+        best = min(self.learners, key=attrgetter('fitness'))
+
+        return best
 
     def random_learner_excluding(self, excluded_index):
         pass
