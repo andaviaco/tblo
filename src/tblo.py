@@ -36,6 +36,7 @@ class TBLO(object):
 
         for i, learner in enumerate(self.learners):
             learner.subjects, learner.fitness = self.teacher_phase(learner, i)
+            learner.subjects, learner.fitness = self.learner_phase(learner, i)
 
         pp.pprint(self.learners)
 
@@ -55,27 +56,54 @@ class TBLO(object):
             diff_mean = teacher.subjects[i] - (tf * s_mean)
             c[i] = subject + (r * diff_mean)
 
-        c_fitness = self.fitness(c)
-
-        if learner.fitness > c_fitness:
-            best = c
-            best_fitness = c_fitness
-        else:
-            best = learner.subjects
-            best_fitness = learner.fitness
+        best, best_fitness = self.select_best(learner.subjects, c)
 
         return (best, best_fitness)
 
     def learner_phase(self, learner, learner_index):
-        pass
+        k_index = self.random_learner_excluding([learner_index])
+        k_learner = self.learners[k_index]
+        k_subjets = k_learner.subjects
+        c = np.zeros(len(learner.subjects))
+
+        for i, subject in enumerate(learner.subjects):
+            if learner.fitness < k_learner.fitness:
+                diff = subject - k_subjets[i]
+            else:
+                diff = k_subjets[i] - subject
+
+            r = rand.random()
+            c[i] = subject + (r * diff)
+
+        best, best_fitness = self.select_best(learner.subjects, c)
+
+        return (best, best_fitness)
 
     def get_teacher(self):
         best = min(self.learners, key=attrgetter('fitness'))
 
         return best
 
+    def select_best(self, subjects, c_subjects):
+        s_fitness = self.fitness(subjects)
+        c_fitness = self.fitness(c_subjects)
+
+        if s_fitness > c_fitness:
+            best = c_subjects
+            best_fitness = c_fitness
+        else:
+            best = subjects
+            best_fitness = s_fitness
+
+        return (best, best_fitness)
+
     def random_learner_excluding(self, excluded_index):
-        pass
+        available_indexes = set(range(self.npopulation))
+        exclude_set = set(excluded_index)
+        diff = available_indexes - exclude_set
+        selected = rand.choice(list(diff))
+
+        return selected
 
     def fitness(self, solution):
         result = self.fn_eval(solution)
