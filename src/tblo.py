@@ -12,7 +12,7 @@ class Learner(object):
         self.fitness = initial_fitness
 
     def __repr__(self):
-        return f'<Learner s: {self.subjects} | f:{self.fitness} >'
+        return f'<Learner s: {self.subjects} | f: {self.fitness} >'
 
 
 class TBLO(object):
@@ -51,6 +51,11 @@ class TBLO(object):
 
     def fitness(self, solution):
         result = self.fn_eval(solution)
+
+        if result >= 0:
+            fitness = 1 / (1 + result)
+        else:
+            fitness = abs(result)
 
         return np.around(result, decimals=4)
 
