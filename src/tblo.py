@@ -57,7 +57,9 @@ class TBLO(object):
             diff_mean = teacher.subjects[i] - (tf * s_mean)
             c[i] = subject + (r * diff_mean)
 
-        best, best_fitness = self.select_best(learner.subjects, c)
+        rounded_c = np.around(c, decimals=4)
+
+        best, best_fitness = self.select_best(learner.subjects, rounded_c)
 
         return (best, best_fitness)
 
@@ -76,7 +78,8 @@ class TBLO(object):
             r = rand.random()
             c[i] = subject + (r * diff)
 
-        best, best_fitness = self.select_best(learner.subjects, c)
+        rounded_c = np.around(c, decimals=4)
+        best, best_fitness = self.select_best(learner.subjects, rounded_c)
 
         return (best, best_fitness)
 
