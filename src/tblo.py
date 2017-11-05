@@ -32,15 +32,16 @@ class TBLO(object):
 
     def optimize(self):
         self.initialize()
-        pp.pprint(self.learners)
+        # pp.pprint(self.learners)
 
         for i, learner in enumerate(self.learners):
             learner.subjects, learner.fitness = self.teacher_phase(learner, i)
             learner.subjects, learner.fitness = self.learner_phase(learner, i)
 
-        pp.pprint(self.learners)
+        # pp.pprint(self.learners)
+        teacher = self.get_teacher()
 
-        return [None, None]
+        return teacher.subjects
 
     def initialize(self):
         self.learners = [self.create_learner() for i in range(self.npopulation)]
